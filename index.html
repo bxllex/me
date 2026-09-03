@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>b.xlle.x — status</title>
+<meta name="description" content="b.xlle.x · สาย IT · ดูแลระบบมาเยอะ แต่ก็อยากดูแลคุณด้วย">
+<meta property="og:title" content="b.xlle.x — status">
+<meta property="og:description" content="ดูแลระบบมาเยอะ แต่ก็อยากดูแลคุณด้วย">
+<meta name="theme-color" content="#070a12">
+<style>
+:root{
+  --bg:#070a12;
+  --panel:#0c111c;
+  --line:#1a2333;
+  --dim:#5a6880;
+  --text:#c6d2e6;
+  --bright:#eaf1ff;
+  --ok:#3fe0a4;
+  --warn:#ffb648;
+  --beam:#6aa9ff;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono","Roboto Mono",Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--mono);
+  font-size:13px;line-height:1.6;-webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;
+  padding:26px 18px calc(30px + env(safe-area-inset-bottom));
+  display:flex;justify-content:center;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:44px 44px;opacity:.16;
+  mask-image:radial-gradient(ellipse 90% 65% at 50% 30%,#000 25%,transparent 100%);
+  -webkit-mask-image:radial-gradient(ellipse 90% 65% at 50% 30%,#000 25%,transparent 100%);
+}
+.wrap{width:100%;max-width:560px;position:relative;z-index:1}
+
+#beam{
+  position:fixed;left:0;right:0;top:0;height:180px;z-index:5;pointer-events:none;
+  background:linear-gradient(to bottom,transparent,rgba(106,169,255,.12) 55%,rgba(106,169,255,.5));
+  animation:sweep 1.15s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes sweep{from{transform:translateY(-190px);opacity:1}to{transform:translateY(105vh);opacity:0}}
+
+header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.name{font-size:27px;font-weight:600;letter-spacing:-.6px;color:var(--bright);margin:0;line-height:1.2}
+.live{
+  display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ok);
+  border:1px solid rgba(63,224,164,.28);border-radius:99px;padding:2px 9px;
+  background:rgba(63,224,164,.06);
+}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--ok);
+  box-shadow:0 0 0 0 rgba(63,224,164,.6);animation:ping 2.4s ease-out infinite}
+@keyframes ping{
+  0%{box-shadow:0 0 0 0 rgba(63,224,164,.55)}
+  70%{box-shadow:0 0 0 7px rgba(63,224,164,0)}
+  100%{box-shadow:0 0 0 0 rgba(63,224,164,0)}
+}
+
+.panel{margin-top:24px;background:var(--panel);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.panel h2{margin:0;padding:8px 13px;font-size:10.5px;font-weight:500;color:var(--dim);
+  letter-spacing:.9px;border-bottom:1px solid var(--line)}
+
+.meters{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
+.meter{background:var(--panel);padding:13px}
+.meter .k{font-size:10.5px;color:var(--dim);letter-spacing:.6px}
+.meter .v{font-size:20px;color:var(--bright);letter-spacing:-.3px;margin-top:3px}
+.meter .v small{font-size:12px;color:var(--dim);letter-spacing:0}
+#spark{display:block;width:100%;height:38px;margin-top:6px}
+
+.svc{display:flex;align-items:center;gap:11px;padding:9px 13px;border-top:1px solid var(--line)}
+.svc:first-of-type{border-top:none}
+.led{width:7px;height:7px;border-radius:50%;flex:none;background:var(--ok);
+  box-shadow:0 0 8px rgba(63,224,164,.75);animation:breathe 3.6s ease-in-out infinite}
+.svc.warn .led{background:var(--warn);box-shadow:0 0 8px rgba(255,182,72,.75)}
+.svc.busy .led{background:var(--beam);box-shadow:0 0 9px rgba(106,169,255,.85);animation-duration:1.5s}
+.svc.busy .state{color:var(--beam)}
+@keyframes breathe{0%,100%{opacity:1}50%{opacity:.42}}
+.svc .label{flex:1;color:var(--text)}
+.svc .state{color:var(--ok);font-size:11.5px}
+.svc.warn .state{color:var(--warn)}
+
+#out{
+  padding:12px 13px;font-size:12.5px;min-height:150px;max-height:340px;
+  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+}
+#out::-webkit-scrollbar{width:5px}
+#out::-webkit-scrollbar-thumb{background:var(--line)}
+#out div{white-space:pre-wrap;word-break:break-word;min-height:1.6em}
+#out .cmd{color:var(--beam)}
+#out .cmd::before{content:"> ";color:var(--dim)}
+#out .hi{color:var(--bright)}
+#out .warnline{color:var(--warn)}
+#out .okline{color:var(--ok)}
+#out .sys{color:#3c485c;font-size:11.5px}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 13px 12px}
+.chip{
+  font-family:inherit;font-size:11.5px;color:var(--text);cursor:pointer;
+  background:#111827;border:1px solid var(--line);border-radius:99px;padding:5px 11px;
+  transition:border-color .16s,color .16s,background .16s;
+}
+.chip:hover,.chip:focus-visible{border-color:rgba(106,169,255,.55);color:var(--bright);background:#141d31}
+.chip:active{transform:translateY(1px)}
+
+.prompt{display:flex;align-items:center;gap:8px;padding:10px 13px;border-top:1px solid var(--line)}
+.prompt span{color:var(--dim);flex:none}
+.prompt input{
+  flex:1;background:none;border:none;outline:none;color:var(--bright);
+  font-family:inherit;font-size:13px;padding:0;min-width:0;caret-color:var(--beam);
+}
+.prompt input::placeholder{color:#3c485c}
+
+.cta{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-top:20px;padding:14px 15px;text-decoration:none;
+  border:1px solid var(--line);border-radius:3px;background:var(--panel);
+  color:var(--bright);transition:border-color .18s,background .18s;
+}
+.cta:hover,.cta:focus-visible{border-color:rgba(106,169,255,.5);background:#101728}
+.cta .sub{display:block;font-size:11px;color:var(--dim);margin-top:2px}
+.cta .arrow{color:var(--beam);font-size:15px}
+:focus-visible{outline:1px solid var(--beam);outline-offset:3px}
+
+footer{display:flex;justify-content:space-between;gap:10px;margin-top:16px;font-size:10.5px;color:#3c485c}
+
+@media (max-width:400px){
+  .meters{grid-template-columns:1fr}
+  .name{font-size:23px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  #beam{display:none}
+}
+</style>
+</head>
+<body>
+<div id="beam" aria-hidden="true"></div>
+
+<div class="wrap">
+
+  <header>
+    <h1 class="name">b.xlle.x</h1>
+    <span class="live"><i class="pulse"></i>online</span>
+  </header>
+
+  <section class="panel" aria-label="ตัวเลขระบบ">
+    <div class="meters">
+      <div class="meter">
+        <div class="k">session uptime</div>
+        <div class="v" id="uptime">00:00:00</div>
+      </div>
+      <div class="meter">
+        <div class="k">latency</div>
+        <div class="v"><span id="ms">--</span><small> ms</small></div>
+        <canvas id="spark" width="520" height="76" aria-hidden="true"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="สถานะระบบ">
+    <h2>service status</h2>
+    <div class="svc"><i class="led"></i><span class="label">servers</span><span class="state">operational</span></div>
+    <div class="svc"><i class="led"></i><span class="label">networks</span><span class="state">operational</span></div>
+    <div class="svc"><i class="led"></i><span class="label">web apps</span><span class="state">operational</span></div>
+    <div class="svc"><i class="led"></i><span class="label">automation</span><span class="state">operational</span></div>
+    <div class="svc warn" id="relRow"><i class="led"></i><span class="label">relationship</span><span class="state" id="relState">waiting for input</span></div>
+  </section>
+
+  <section class="panel" aria-label="คอนโซล">
+    <h2>console</h2>
+    <div id="out" aria-live="polite"></div>
+    <div class="chips" id="chips"></div>
+    <div class="prompt">
+      <span aria-hidden="true">&gt;</span>
+      <input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
+             placeholder="พิมพ์อะไรก็ได้ แล้วกด enter" aria-label="ช่องพิมพ์คำสั่ง">
+    </div>
+  </section>
+
+  <a class="cta" href="https://www.tiktok.com/@b.xlle.x" target="_blank" rel="noopener">
+    <span>tiktok<span class="sub">@b.xlle.x</span></span>
+    <span class="arrow" aria-hidden="true">↗</span>
+  </a>
+
+  <footer>
+    <span id="clock">bkk</span>
+    <span>built by hand</span>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+var pad=function(n){return String(n).padStart(2,'0')};
+
+/* ── uptime / นาฬิกา ── */
+var t0=Date.now();
+setInterval(function(){
+  var s=Math.floor((Date.now()-t0)/1000);
+  $('uptime').textContent=pad(Math.floor(s/3600))+':'+pad(Math.floor(s%3600/60))+':'+pad(s%60);
+},1000);
+setInterval(function(){
+  var d=new Date();
+  $('clock').textContent='bkk · '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+},1000);
+
+/* ── latency วัดจริง ── */
+var data=[],MAX=60,synth=18,lastMs=0;
+function push(v){
+  if(v===null||!isFinite(v)){
+    synth+=(Math.random()-.5)*6; synth=Math.min(48,Math.max(9,synth)); v=synth;
+  }
+  lastMs=Math.round(Math.min(v,400));
+  data.push(lastMs); if(data.length>MAX)data.shift();
+  $('ms').textContent=lastMs; draw();
+}
+function measure(){
+  var st=performance.now();
+  fetch(location.pathname+'?_='+st,{method:'HEAD',cache:'no-store'})
+    .then(function(){push(performance.now()-st)})
+    .catch(function(){push(null)});
+}
+var cv=$('spark'),cx=cv.getContext('2d');
+function draw(){
+  var w=cv.width,h=cv.height; cx.clearRect(0,0,w,h);
+  if(data.length<2)return;
+  var hi=Math.max.apply(null,data),lo=Math.min.apply(null,data);
+  var span=Math.max(hi-lo,8),p=8;
+  var pt=function(i){return [i*(w/(MAX-1)), h-p-((data[i]-lo)/span)*(h-p*2)]};
+  var g=cx.createLinearGradient(0,0,0,h);
+  g.addColorStop(0,'rgba(106,169,255,.30)'); g.addColorStop(1,'rgba(106,169,255,0)');
+  cx.beginPath(); cx.moveTo(0,h);
+  for(var i=0;i<data.length;i++){var a=pt(i);cx.lineTo(a[0],a[1])}
+  cx.lineTo(pt(data.length-1)[0],h); cx.closePath(); cx.fillStyle=g; cx.fill();
+  cx.beginPath();
+  for(var j=0;j<data.length;j++){var b=pt(j); j?cx.lineTo(b[0],b[1]):cx.moveTo(b[0],b[1])}
+  cx.strokeStyle='#6aa9ff'; cx.lineWidth=1.5; cx.lineJoin='round'; cx.lineCap='round'; cx.stroke();
+  var L=pt(data.length-1);
+  cx.beginPath(); cx.arc(L[0]-1,L[1],2.4,0,Math.PI*2); cx.fillStyle='#9cc6ff'; cx.fill();
+}
+for(var k=0;k<8;k++)push(null);
+measure(); setInterval(measure,2200);
+
+/* ══ คอนโซล ══ */
+var out=$('out'),input=$('in');
+var busy=false,history=[],hIdx=0;
+
+function line(text,cls){
+  var d=document.createElement('div');
+  if(cls)d.className=cls;
+  d.textContent=text;
+  out.appendChild(d);
+  out.scrollTop=out.scrollHeight;
+  return d;
+}
+function wait(ms){return new Promise(function(r){setTimeout(r,reduced?0:ms)})}
+function type(text,cls,speed){
+  return new Promise(function(res){
+    var d=line('',cls);
+    if(reduced||!text){ d.textContent=text; return res(); }
+    var i=0,sp=speed||14;
+    (function step(){
+      d.textContent=text.slice(0,++i);
+      out.scrollTop=out.scrollHeight;
+      if(i<text.length) setTimeout(step,sp); else res();
+    })();
+  });
+}
+async function say(lines){
+  for(var i=0;i<lines.length;i++){
+    var L=lines[i];
+    if(typeof L==='number'){ await wait(L); continue; }
+    if(typeof L==='string'){ await type(L); continue; }
+    await type(L[0],L[1],L[2]);
+  }
+}
+
+/* ── คำสั่ง ── */
+var CMDS={};
+
+CMDS.whoami=function(){
+  return say([
+    ['b.xlle.x','hi'],
+    'สาย IT',
+    '',
+    260,
+    'ดูแลระบบมาเยอะ',
+    440,
+    ['แต่ก็อยากดูแลคุณด้วย','hi',26]
+  ]);
+};
+
+CMDS.scan=async function(){
+  var n=navigator,s=screen,ua=n.userAgent;
+  await say([['[scan] กำลังอ่านข้อมูลจากเบราว์เซอร์ของคุณ...','sys'],460]);
+  var os='ไม่รู้จัก';
+  if(/Android/i.test(ua))os='Android';
+  else if(/iPhone|iPad|iPod/i.test(ua))os='iOS';
+  else if(/Windows/i.test(ua))os='Windows';
+  else if(/Mac/i.test(ua))os='macOS';
+  else if(/Linux/i.test(ua))os='Linux';
+  var br='ไม่รู้จัก';
+  if(/Edg\//.test(ua))br='Edge';
+  else if(/OPR\//.test(ua))br='Opera';
+  else if(/Chrome\//.test(ua))br='Chrome';
+  else if(/Firefox\//.test(ua))br='Firefox';
+  else if(/Safari\//.test(ua))br='Safari';
+  var rows=[
+    'ระบบปฏิบัติการ   '+os,
+    'เบราว์เซอร์       '+br,
+    'ขนาดหน้าจอ       '+s.width+' x '+s.height,
+    'ซีพียู            '+(n.hardwareConcurrency||'?')+' คอร์',
+    'ภาษา             '+(n.language||'?'),
+    'โซนเวลา          '+(Intl.DateTimeFormat().resolvedOptions().timeZone||'?'),
+    'ระบบสัมผัส        '+('ontouchstart' in window?'มี':'ไม่มี')
+  ];
+  for(var i=0;i<rows.length;i++){ await type(rows[i]); await wait(70); }
+  if(n.getBattery){
+    try{
+      var b=await n.getBattery();
+      await type('แบตเตอรี่         '+Math.round(b.level*100)+'%'+(b.charging?' (กำลังชาร์จ)':''));
+    }catch(e){}
+  }
+  await wait(420);
+  await say([
+    '',
+    ['ทั้งหมดนี้เบราว์เซอร์คุณบอกมาเอง ไม่ได้ไปล้วงที่ไหน','sys'],
+    ['และไม่ได้เก็บไว้ด้วย ปิดแท็บก็หายหมด','sys'],
+    520,
+    ['รู้จักเครื่องคุณหมดแล้ว เหลือแค่ยังไม่รู้จักคุณ','hi',26]
+  ]);
+};
+
+CMDS.ping=async function(){
+  await type('PING b.xlle.x — ส่งไป 4 ครั้ง','sys');
+  for(var i=1;i<=4;i++){
+    await wait(440);
+    await type('  ครั้งที่ '+i+'   ตอบกลับใน '+lastMs+' ms','okline');
+  }
+  await wait(340);
+  var v=lastMs<40?'เน็ตดีมาก':(lastMs<120?'เน็ตใช้ได้เลย':'เน็ตช้าไปนิดนะ');
+  await say([
+    '',
+    v+' — ส่งไป 4 กลับมา 4 ไม่หายสักครั้ง',
+    480,
+    ['ส่งไปหาคุณกี่ครั้ง ก็อยากให้กลับมาแบบนี้','hi',26]
+  ]);
+};
+
+CMDS.dontpress=function(){
+  return say([
+    ['[!] คำเตือนถูกเพิกเฉย','warnline'],
+    420,
+    'บอกแล้วว่าห้ามกด',
+    440,
+    ['แต่ก็ดี ชอบคนไม่ค่อยฟังอยู่พอดี','hi',26]
+  ]);
+};
+
+CMDS.help=function(){
+  return say([
+    'คำสั่งที่พิมพ์ได้:',
+    '  whoami    ใครทำเว็บนี้',
+    '  scan      เว็บนี้รู้อะไรเกี่ยวกับคุณบ้าง',
+    '  ping      วัดเน็ตของคุณจริงๆ',
+    '  uptime    เปิดหน้านี้ค้างไว้นานแค่ไหนแล้ว',
+    '  date      ตอนนี้กี่โมง',
+    '  clear     ล้างหน้าจอ',
+    '',
+    ['ยังมีอีกหลายคำสั่งที่ไม่ได้เขียนไว้ตรงนี้','sys'],
+    ['พิมพ์มั่วก็ได้ ระบบไม่ว่าอะไร','sys']
+  ]);
+};
+
+CMDS.uptime=function(){
+  var s=Math.floor((Date.now()-t0)/1000);
+  return say([
+    'เปิดหน้านี้ค้างไว้ '+Math.floor(s/60)+' นาที '+(s%60)+' วินาที',
+    400,
+    ['นานกว่าที่คิดไว้นะเนี่ย','hi',26]
+  ]);
+};
+
+CMDS.date=function(){
+  return say([new Date().toLocaleString('th-TH',{dateStyle:'full',timeStyle:'medium'})]);
+};
+
+CMDS.clear=function(){ out.innerHTML=''; return Promise.resolve(); };
+
+/* ── ของซ่อน ── */
+CMDS.sudo=function(){
+  return say([['b.xlle.x ไม่อยู่ในรายชื่อผู้มีสิทธิ์','warnline'],380,'เรื่องนี้จะถูกบันทึกไว้',400,['ล้อเล่น ไม่ได้บันทึกอะไรหรอก','sys']]);
+};
+CMDS.exit=function(){ return say(['ปิดได้นะ',380,['แต่ไม่ต้องรีบก็ได้','hi',26]]); };
+CMDS.ls=function(){ return say(['about.txt    ping.log    feelings.db',300,['feelings.db เปิดไม่ได้ ไฟล์เสียมานานแล้ว','sys']]); };
+CMDS.coffee=function(){ return say([['error: ไม่พบทรัพยากรที่ต้องการ','warnline'],340,'เติมก่อนแล้วค่อยมาใหม่']); };
+CMDS.hello=function(){ return say(['อ้าว ทักมาเลยเหรอ',360,['ระบบว่างอยู่ตลอดนะ','hi',26]]); };
+CMDS.love=function(){ return say([['กำลังประมวลผล...','sys'],760,['ล้มเหลว ลองใหม่อีกครั้ง','warnline'],440,'ล้อเล่น ลองมาแล้ว ยังไม่ล้มสักที']); };
+CMDS.neofetch=function(){ return CMDS.scan(); };
+
+var ALIAS={
+  'help':'help','?':'help','ช่วย':'help','ช่วยด้วย':'help',
+  'whoami':'whoami','who':'whoami','ใคร':'whoami','นี่ใคร':'whoami',
+  'scan':'scan','neofetch':'neofetch',
+  'ping':'ping','uptime':'uptime','date':'date','time':'date',
+  'clear':'clear','cls':'clear',
+  'exit':'exit','quit':'exit','ls':'ls','dir':'ls',
+  'coffee':'coffee','กาแฟ':'coffee',
+  'hi':'hello','hello':'hello','หวัดดี':'hello','สวัสดี':'hello',
+  'love':'love','รัก':'love','จีบ':'love'
+};
+
+async function run(raw){
+  var cmd=String(raw||'').trim();
+  if(!cmd||busy)return;
+  busy=true; input.disabled=true;
+  history.push(cmd); hIdx=history.length;
+  line(cmd,'cmd');
+  await wait(190);
+
+  var key=cmd.toLowerCase(),fn=null;
+  if(/rm\s+-rf/.test(key)||key==='dontpress') fn=CMDS.dontpress;
+  else if(/^sudo\b/.test(key)) fn=CMDS.sudo;
+  else if(ALIAS[key]) fn=CMDS[ALIAS[key]];
+
+  if(fn) await fn();
+  else await freeInput(cmd);
+
+  line('','');
+  busy=false; input.disabled=false;
+}
+
+/* ── พิมพ์อะไรที่ไม่ใช่คำสั่ง = กรอกข้อมูลให้ relationship ── */
+var submitted=0;
+async function freeInput(text){
+  submitted++;
+  var state=$('relState'), row=$('relRow');
+
+  if(submitted===1){
+    await say([
+      ['[relationship] ได้รับข้อมูลแล้ว','sys'],
+      520,
+      ['[relationship] กำลังตรวจสอบ...','sys'],
+      780
+    ]);
+    state.textContent='reviewing your input';
+    row.classList.remove('warn'); row.classList.add('busy');
+    await say([
+      ['สถานะเปลี่ยนเป็น: reviewing your input','okline'],
+      460,
+      ['เห็นไหม บรรทัดข้างบนเปลี่ยนแล้วนะ','sys'],
+      520,
+      ['"'+text+'" — จำไว้แล้ว','hi',26]
+    ]);
+    return;
+  }
+
+  if(submitted===2){
+    await say([
+      ['[relationship] ได้รับข้อมูลเพิ่ม','sys'],
+      460,
+      'ข้อมูลซ้ำ แต่ก็รับไว้อีกรอบ',
+      480,
+      ['ชอบคนที่พิมพ์มาสองครั้ง','hi',26]
+    ]);
+    return;
+  }
+
+  if(submitted===3){
+    state.textContent='processing';
+    await say([
+      ['[relationship] คิวเต็มแล้ว','warnline'],
+      440,
+      'ระบบประมวลผลไม่ทัน',
+      480,
+      ['พิมพ์มาเยอะขนาดนี้ ระบบเริ่มไม่ไหวแล้วนะ','hi',26]
+    ]);
+    return;
+  }
+
+  await say([
+    ['[relationship] ยังอ่านอยู่ ไม่ต้องรีบ','sys'],
+    420,
+    ['"'+text+'" — รับไว้แล้วเหมือนกัน','hi',26]
+  ]);
+}
+
+/* ── ปุ่ม ── */
+var CHIPS=[
+  ['นี่ใครกันนะ','whoami'],
+  ['รู้อะไรเกี่ยวกับฉันบ้าง','scan'],
+  ['เน็ตฉันเร็วแค่ไหน','ping'],
+  ['ห้ามกดนะ','dontpress'],
+  ['มีอะไรให้เล่นอีก','help']
+];
+CHIPS.forEach(function(c){
+  var b=document.createElement('button');
+  b.className='chip'; b.type='button'; b.textContent=c[0];
+  b.onclick=function(){ ghostType(c[1]); };
+  $('chips').appendChild(b);
+});
+/* กดปุ่มแล้วคำสั่งจริงจะค่อยๆ พิมพ์ลงในช่องให้เห็น */
+var ghosting=false;
+function ghostType(cmd){
+  if(busy||ghosting)return;
+  if(reduced){ run(cmd); return; }
+  ghosting=true; input.value='';
+  var i=0;
+  (function step(){
+    input.value=cmd.slice(0,++i);
+    if(i<cmd.length) setTimeout(step,55);
+    else setTimeout(function(){ input.value=''; ghosting=false; run(cmd); },240);
+  })();
+}
+
+input.addEventListener('keydown',function(e){
+  if(e.key==='Enter'){ var v=input.value; input.value=''; run(v); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); if(hIdx>0) input.value=history[--hIdx]; }
+  else if(e.key==='ArrowDown'){
+    e.preventDefault();
+    if(hIdx<history.length-1) input.value=history[++hIdx];
+    else { hIdx=history.length; input.value=''; }
+  }
+});
+
+/* ── ทักทายตอนเปิด ── */
+setTimeout(function(){
+  say([['ระบบพร้อมทำงาน','sys'],['กดปุ่มข้างล่าง หรือพิมพ์อะไรก็ได้ลงในช่อง','sys']]);
+},reduced?0:1500);
+
+/* ── อยู่นานแล้วระบบทักเอง ── */
+setTimeout(function(){ if(!busy) say([['[session] อยู่นานเลยนะ ระบบไม่ได้ทำอะไรผิดใช่ไหม','sys']]); },75000);
+setTimeout(function(){ if(!busy) say([['[session] ยังอยู่อีก เริ่มชอบแล้วนะเนี่ย','sys']]); },170000);
+
+setTimeout(function(){ var b=$('beam'); if(b)b.remove(); },1400);
+})();
+</script>
+</body>
+</html>
