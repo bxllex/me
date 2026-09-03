@@ -531,10 +531,44 @@ input.addEventListener('keydown',function(e){
   }
 });
 
-/* ── ทักทายตอนเปิด ── */
+/* ── ทักทายตอนเปิด + ทักตามเวลาจริง ── */
+function greetByHour(){
+  var h=new Date().getHours();
+  if(h>=0&&h<5)   return 'ตี'+(h===0?'สิบสอง':h)+'แล้ว ยังไม่นอนอีกเหรอ';
+  if(h<7)         return 'เช้ามากเลยนะ ระบบเพิ่งตื่นเหมือนกัน';
+  if(h<11)        return 'เช้านี้ระบบตื่นก่อนคุณอีก';
+  if(h<13)        return 'เที่ยงแล้ว กินข้าวหรือยัง';
+  if(h<16)        return 'บ่ายแล้ว ระบบก็เริ่มง่วงเหมือนกัน';
+  if(h<19)        return 'เย็นแล้ว วันนี้เป็นยังไงบ้าง';
+  if(h<22)        return 'ค่ำแล้ว ว่างพอดีเลยใช่ไหม';
+  return 'ดึกแล้วนะ แต่ระบบยังไม่ปิด';
+}
 setTimeout(function(){
-  say([['ระบบพร้อมทำงาน','sys'],['กดปุ่มข้างล่าง หรือพิมพ์อะไรก็ได้ลงในช่อง','sys']]);
+  say([
+    ['ระบบพร้อมทำงาน','sys'],
+    ['[system] '+greetByHour(),'sys'],
+    ['กดปุ่มข้างล่าง หรือพิมพ์อะไรก็ได้ลงในช่อง','sys']
+  ]);
 },reduced?0:1500);
+
+/* ── สลับแท็บออกไปแล้วชื่อแท็บเปลี่ยน ── */
+var realTitle=document.title, awayTimer=null, awayCount=0;
+var AWAY=['เอ๊ะ ไปไหนแล้ว','ยังรออยู่นะ','กลับมาก่อนสิ','ระบบเหงาแล้ว'];
+document.addEventListener('visibilitychange',function(){
+  clearTimeout(awayTimer);
+  if(document.hidden){
+    var i=0;
+    (function cycle(){
+      document.title=AWAY[Math.min(i,AWAY.length-1)];
+      i++; awayTimer=setTimeout(cycle,6000);
+    })();
+  }else{
+    document.title=realTitle;
+    awayCount++;
+    if(awayCount===1&&!busy) say([['[system] อ้าว กลับมาแล้ว','sys']]);
+    else if(awayCount===3&&!busy) say([['[system] หนีไปแล้วกลับมาอีก ระบบเริ่มชินแล้วนะ','sys']]);
+  }
+});
 
 /* ── อยู่นานแล้วระบบทักเอง ── */
 setTimeout(function(){ if(!busy) say([['[session] อยู่นานเลยนะ ระบบไม่ได้ทำอะไรผิดใช่ไหม','sys']]); },75000);
