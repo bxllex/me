@@ -68,11 +68,12 @@ body::before{
 }
 .panel h2 b{font-weight:500;color:var(--beam)}
 .pad{padding:16px 14px}
-.howto{font-size:12.5px;color:var(--text);margin:0 0 14px;text-align:center}
-.lives{display:flex;justify-content:center;gap:5px;margin-top:12px}
-.lives i{width:7px;height:7px;border-radius:50%;background:var(--ok);transition:background .2s}
+.col{max-width:300px;margin:0 auto}
+.howto{font-size:12.5px;color:var(--text);margin:0 0 14px;text-align:center;line-height:1.55}
+.lives{display:flex;justify-content:center;gap:6px;margin-top:14px}
+.lives i{width:8px;height:8px;border-radius:50%;background:var(--ok);transition:background .2s}
 .lives i.gone{background:#232d3f}
-.verdict{text-align:center;font-size:12.5px;min-height:1.8em;margin-top:10px;color:var(--dim)}
+.verdict{text-align:center;font-size:12.5px;min-height:1.8em;margin:8px 0 12px;color:var(--dim)}
 .verdict .good{color:var(--ok)} .verdict .bad{color:var(--bad)}
 
 /* ── ด่าน 1: แถบสัญญาณ ── */
@@ -97,16 +98,16 @@ body::before{
 .padbtn.bad{background:rgba(255,90,110,.2);border-color:var(--bad)}
 
 /* ── ด่าน 3: ตารางหาจุดต่าง ── */
-.hunt{display:grid;gap:4px;justify-content:center}
+.hunt{display:grid;gap:5px;margin:0 auto;width:100%}
 .cellbtn{
-  width:100%;aspect-ratio:1/1;min-width:0;border:1px solid transparent;border-radius:2px;
-  background:none;color:#4e5d78;font-family:inherit;font-size:15px;cursor:pointer;
+  width:100%;aspect-ratio:1/1;min-width:0;border:1px solid transparent;border-radius:3px;
+  background:#0a0f1a;color:#5c6d8a;font-family:inherit;font-size:19px;cursor:pointer;
   display:grid;place-items:center;transition:color .12s,background .12s;
 }
 .cellbtn:hover{color:var(--text);background:#111a2b}
 .cellbtn.hit{background:rgba(63,224,164,.22);color:var(--ok)}
 .cellbtn.miss{background:rgba(255,90,110,.2);color:var(--bad)}
-.timer{height:3px;background:var(--line);border-radius:2px;overflow:hidden;margin-bottom:13px}
+.timer{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin:0 auto 14px;width:100%}
 .timer i{display:block;height:100%;width:100%;background:var(--beam);transition:width .1s linear}
 .timer i.low{background:var(--bad)}
 
@@ -118,8 +119,11 @@ body::before{
 }
 .btn:hover{filter:brightness(1.08)}
 .btn:active{transform:translateY(1px)}
-.btn.ghost{background:none;color:var(--dim);font-weight:400;letter-spacing:0;font-size:11.5px;padding:10px}
-.btn.ghost:hover{color:var(--beam);filter:none}
+.btn.ghost{
+  background:none;color:var(--dim);font-weight:400;letter-spacing:0;font-size:12px;
+  padding:10px;border:1px solid var(--line);margin-top:9px;
+}
+.btn.ghost:hover{color:var(--beam);border-color:rgba(106,169,255,.45);filter:none}
 .btn[disabled]{opacity:.45;cursor:default}
 :focus-visible{outline:1px solid var(--beam);outline-offset:3px}
 
@@ -184,6 +188,8 @@ header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .cta:hover,.cta:focus-visible{border-color:rgba(106,169,255,.5);background:#101728}
 .cta .subt{display:block;font-size:11px;color:var(--dim);margin-top:2px}
 .cta .arrow{color:var(--beam);font-size:15px}
+.cta.quiet{opacity:.5;margin-top:22px}
+.cta.quiet:hover{opacity:1}
 
 footer{display:flex;justify-content:space-between;gap:10px;margin-top:16px;font-size:10.5px;color:#3c485c}
 
@@ -209,18 +215,17 @@ footer{display:flex;justify-content:space-between;gap:10px;margin-top:16px;font-
   <!-- หน้าเริ่ม -->
   <section class="panel" id="introPanel">
     <h2><span>security gate</span><b>locked</b></h2>
-    <div class="pad">
-      <p class="howto">3 ด่าน ไม่ต้องพิมพ์อะไรเลย แตะอย่างเดียว<br>พลาดได้ด่านละ 2 ครั้ง</p>
-      <button class="btn" id="startBtn">เริ่มปลดล็อก</button>
-      <button class="btn ghost" id="skipBtn">ข้ามไปก่อน ขอดูเฉยๆ</button>
-    </div>
+    <div class="pad"><div class="col">
+      <p class="howto">ไม่มีรหัสผ่าน<br>มีแค่อยากถ่วงเวลาให้คุณอยู่นานขึ้นอีกหน่อย</p>
+      <button class="btn" id="startBtn">เริ่ม</button>
+    </div></div>
   </section>
 
   <!-- ด่าน 1 -->
   <section class="panel hidden" id="s1">
     <h2><span>layer 1 — signal</span><b id="s1n">1 / 3</b></h2>
-    <div class="pad">
-      <p class="howto">กดให้เข็มหยุดในกรอบเขียว — 3 ครั้ง กรอบจะแคบลงเรื่อยๆ</p>
+    <div class="pad"><div class="col">
+      <p class="howto">กดให้เข็มหยุดในกรอบเขียว — 3 ครั้ง<br>กรอบจะแคบลงเรื่อยๆ</p>
       <div class="track" id="track">
         <div class="ticks"></div>
         <div class="zone" id="zone"></div>
@@ -229,34 +234,36 @@ footer{display:flex;justify-content:space-between;gap:10px;margin-top:16px;font-
       <div class="lives" id="lv1"><i></i><i></i><i></i></div>
       <div class="verdict" id="v1">&nbsp;</div>
       <button class="btn" id="stopBtn">STOP</button>
-      <button class="btn ghost skip">ข้ามไปก่อน ขอดูเฉยๆ</button>
-    </div>
+    </div></div>
   </section>
 
   <!-- ด่าน 2 -->
   <section class="panel hidden" id="s2">
     <h2><span>layer 2 — sequence</span><b id="s2n">1 / 3</b></h2>
-    <div class="pad">
+    <div class="pad"><div class="col">
       <p class="howto">ดูไฟที่กะพริบ แล้วกดตามลำดับเดิม</p>
       <div class="pads" id="pads"></div>
       <div class="lives" id="lv2"><i></i><i></i><i></i></div>
       <div class="verdict" id="v2">&nbsp;</div>
-      <button class="btn ghost skip">ข้ามไปก่อน ขอดูเฉยๆ</button>
-    </div>
+    </div></div>
   </section>
 
   <!-- ด่าน 3 -->
   <section class="panel hidden" id="s3">
     <h2><span>layer 3 — firewall</span><b id="s3n">1 / 3</b></h2>
-    <div class="pad">
-      <p class="howto" id="h3">หาตัวที่ไม่เหมือนชาวบ้าน ก่อนเวลาหมด</p>
+    <div class="pad"><div class="col">
+      <p class="howto" id="h3">มีตัวหนึ่งไม่เหมือนตัวอื่น<br>หาให้เจอก่อนแถบจะหมด</p>
       <div class="timer"><i id="tbar"></i></div>
       <div class="hunt" id="hunt"></div>
       <div class="lives" id="lv3"><i></i><i></i><i></i></div>
       <div class="verdict" id="v3">&nbsp;</div>
-      <button class="btn ghost skip">ข้ามไปก่อน ขอดูเฉยๆ</button>
-    </div>
+    </div></div>
   </section>
+
+  <a class="cta quiet" href="https://www.tiktok.com/@b.xlle.x" target="_blank" rel="noopener">
+    <span>tiktok<span class="subt">@b.xlle.x</span></span>
+    <span class="arrow" aria-hidden="true">↗</span>
+  </a>
 </div>
 
 <!-- ═══════ โปรไฟล์ ═══════ -->
@@ -374,7 +381,7 @@ function openStage(n){
 
 /* ─── ด่าน 1: จับจังหวะ ─── */
 var s1={round:0,raf:0,pos:0,dir:1,speed:0,zs:0,zw:0,running:false};
-var ZW=[24,16,10], SP=[0.055,0.075,0.1];
+var ZW=[26,18,13], SP=[0.055,0.072,0.094];
 function layoutZone(){
   $('zone').style.left=s1.zs+'%';
   $('zone').style.width=s1.zw+'%';
@@ -495,18 +502,16 @@ function s2Tap(i){
 var s3={round:0,timer:0,t:0,limit:0,answer:-1,alive:false};
 var ROUNDS3=[
   {n:5,time:7000,base:'0',odd:'O'},
-  {n:6,time:6000,base:'1',odd:'l'},
-  {n:7,time:5000,base:'8',odd:'B'}
+  {n:6,time:6500,base:'1',odd:'l'},
+  {n:6,time:5000,base:'8',odd:'B'}
 ];
 function startStage3(){ s3.round=0; showLives('lv3'); $('v3').innerHTML='&nbsp;'; s3Round(); }
 function s3Round(){
   var R=ROUNDS3[s3.round];
   $('s3n').textContent=(s3.round+1)+' / 3';
-  $('h3').textContent='มีตัวหนึ่งไม่เหมือนตัวอื่น หาให้เจอก่อนแถบจะหมด';
   var box=$('hunt');
   box.innerHTML='';
   box.style.gridTemplateColumns='repeat('+R.n+',1fr)';
-  box.style.maxWidth=(R.n*40)+'px';
   var total=R.n*R.n;
   s3.answer=Math.floor(Math.random()*total);
   for(var i=0;i<total;i++){
@@ -591,19 +596,11 @@ function unlock(skipped){
 }
 
 $('startBtn').onclick=function(){ runStart=Date.now(); beep(620,.08); openStage(1); };
-Array.prototype.forEach.call(document.querySelectorAll('.skip'),function(b){
-  b.onclick=function(){ unlock(true) };
-});
-$('skipBtn').onclick=function(){ unlock(true) };
 
-/* เคยปลดล็อกแล้ว → ให้ทางลัด */
+/* เคยผ่านมาแล้ว */
 if(LS.get('bxllex_unlocked')==='1'){
-  $('lockSub').textContent='เคยผ่านมาแล้วนี่ จะเล่นอีกรอบก็ได้';
-  $('startBtn').textContent='เล่นอีกรอบ';
-  var again=document.createElement('button');
-  again.className='btn ghost'; again.textContent='เข้าเลย ไม่ต้องเล่น';
-  again.onclick=function(){ unlock(true) };
-  $('skipBtn').replaceWith(again);
+  $('lockSub').textContent='เคยผ่านมาแล้วนี่ คราวนี้จะเร็วกว่าเดิมไหม';
+  $('startBtn').textContent='เอาใหม่';
 }
 
 /* ══════════════ คอนโซล ══════════════ */
@@ -653,24 +650,15 @@ function greetByHour(){
 }
 
 async function boot(skipped,secs,best){
-  if(skipped){
-    await say([
-      ['[system] เข้าแบบ guest ไม่ว่ากัน','sys'],
-      ['[system] '+greetByHour(),'sys'],
-      620,
-      ['ไม่เล่นก็ได้ แต่ข้างในมีอะไรมากกว่านี้นะ','hi',26]
-    ]);
-  }else{
-    await say([
-      ['[system] ปลดล็อกครบ 3 ชั้น','okline'],
-      ['[system] ใช้เวลา '+secs+' วินาที'+(best&&parseInt(best,10)===secs?'  (สถิติใหม่)':''),'sys'],
-      ['[system] '+greetByHour(),'sys'],
-      620,
-      'คนส่วนใหญ่กดข้ามไปแล้วตั้งแต่ด่านแรก',
-      460,
-      ['แต่คุณอยู่จนจบ','hi',26]
-    ]);
-  }
+  var isBest = best && parseInt(best,10)===secs;
+  await say([
+    ['[system] ปลดล็อกครบ 3 ชั้น','okline'],
+    (isBest?['[system] เร็วกว่าครั้งก่อน','sys']:['[system] '+greetByHour(),'sys']),
+    680,
+    'ถ่วงไว้ได้สำเร็จ',
+    460,
+    ['ขอบคุณที่ไม่รีบไปไหน','hi',26]
+  ]);
 }
 
 var CMDS={};
