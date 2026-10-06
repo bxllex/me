@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>b.xlle.x — status</title>
-<meta name="description" content="b.xlle.x · สาย IT · ดูแลระบบมาเยอะ แต่ก็อยากดูแลคุณด้วย">
-<meta property="og:title" content="b.xlle.x — status">
-<meta property="og:description" content="ดูแลระบบมาเยอะ แต่ก็อยากดูแลคุณด้วย">
+<title>ACCESS DENIED — b.xlle.x</title>
+<meta name="description" content="ระบบล็อกอยู่ 3 ชั้น ผ่านได้ถึงจะรู้ว่าใคร">
+<meta property="og:title" content="ACCESS DENIED — b.xlle.x">
+<meta property="og:description" content="ระบบล็อกอยู่ 3 ชั้น ผ่านได้ถึงจะรู้ว่าใคร">
 <meta name="theme-color" content="#070a12">
 <style>
 :root{
@@ -18,6 +18,7 @@
   --bright:#eaf1ff;
   --ok:#3fe0a4;
   --warn:#ffb648;
+  --bad:#ff5a6e;
   --beam:#6aa9ff;
   --mono:ui-monospace,"SF Mono",SFMono-Regular,"JetBrains Mono","Roboto Mono",Consolas,monospace;
 }
@@ -38,22 +39,95 @@ body::before{
   mask-image:radial-gradient(ellipse 90% 65% at 50% 30%,#000 25%,transparent 100%);
   -webkit-mask-image:radial-gradient(ellipse 90% 65% at 50% 30%,#000 25%,transparent 100%);
 }
-.wrap{width:100%;max-width:560px;position:relative;z-index:1}
+.wrap{width:100%;max-width:520px;position:relative;z-index:1}
+.hidden{display:none!important}
 
-#beam{
-  position:fixed;left:0;right:0;top:0;height:180px;z-index:5;pointer-events:none;
-  background:linear-gradient(to bottom,transparent,rgba(106,169,255,.12) 55%,rgba(106,169,255,.5));
-  animation:sweep 1.15s cubic-bezier(.4,0,.2,1) forwards;
+/* ── จอล็อก ── */
+.lockhead{text-align:center;padding:14px 0 4px}
+.denied{
+  font-size:26px;font-weight:600;letter-spacing:2px;color:var(--bad);
+  margin:0;line-height:1.25;text-shadow:0 0 22px rgba(255,90,110,.35);
 }
-@keyframes sweep{from{transform:translateY(-190px);opacity:1}to{transform:translateY(105vh);opacity:0}}
+.denied.ok{color:var(--ok);text-shadow:0 0 22px rgba(63,224,164,.35)}
+.sub{color:var(--dim);font-size:12px;margin:8px 0 0}
 
+/* ── แถบความคืบหน้า 3 ชั้น ── */
+.layers{display:flex;gap:6px;margin:18px 0 0}
+.layers i{
+  flex:1;height:4px;border-radius:2px;background:var(--line);
+  transition:background .4s,box-shadow .4s;
+}
+.layers i.on{background:var(--ok);box-shadow:0 0 10px rgba(63,224,164,.5)}
+.layers i.cur{background:var(--beam);box-shadow:0 0 10px rgba(106,169,255,.5)}
+
+.panel{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.panel h2{
+  margin:0;padding:9px 13px;font-size:10.5px;font-weight:500;color:var(--dim);
+  letter-spacing:.9px;border-bottom:1px solid var(--line);
+  display:flex;justify-content:space-between;gap:10px
+}
+.panel h2 b{font-weight:500;color:var(--beam)}
+.pad{padding:16px 14px}
+.howto{font-size:12.5px;color:var(--text);margin:0 0 14px;text-align:center}
+.lives{display:flex;justify-content:center;gap:5px;margin-top:12px}
+.lives i{width:7px;height:7px;border-radius:50%;background:var(--ok);transition:background .2s}
+.lives i.gone{background:#232d3f}
+.verdict{text-align:center;font-size:12.5px;min-height:1.8em;margin-top:10px;color:var(--dim)}
+.verdict .good{color:var(--ok)} .verdict .bad{color:var(--bad)}
+
+/* ── ด่าน 1: แถบสัญญาณ ── */
+.track{
+  position:relative;height:58px;border:1px solid var(--line);border-radius:3px;
+  background:#080c15;overflow:hidden;
+}
+.zone{position:absolute;top:0;bottom:0;background:rgba(63,224,164,.14);border-left:1px solid rgba(63,224,164,.5);border-right:1px solid rgba(63,224,164,.5)}
+.needle{position:absolute;top:0;bottom:0;width:2px;background:var(--beam);box-shadow:0 0 12px rgba(106,169,255,.9)}
+.ticks{position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,rgba(106,169,255,.10) 0 1px,transparent 1px 26px)}
+
+/* ── ด่าน 2: แผงจำลำดับ ── */
+.pads{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.padbtn{
+  aspect-ratio:1/1;border:1px solid var(--line);border-radius:3px;background:#0a0f1a;
+  cursor:pointer;transition:background .12s,border-color .12s,box-shadow .12s;
+  display:grid;place-items:center;font-family:inherit;font-size:11px;color:#31405a;
+}
+.padbtn b{font-weight:400;color:#31405a;font-size:12px}
+.padbtn.lit{background:rgba(106,169,255,.22);border-color:var(--beam);box-shadow:0 0 16px rgba(106,169,255,.3) inset}
+.padbtn.good{background:rgba(63,224,164,.2);border-color:var(--ok)}
+.padbtn.bad{background:rgba(255,90,110,.2);border-color:var(--bad)}
+
+/* ── ด่าน 3: ตารางหาจุดต่าง ── */
+.hunt{display:grid;gap:4px;justify-content:center}
+.cellbtn{
+  width:100%;aspect-ratio:1/1;min-width:0;border:1px solid transparent;border-radius:2px;
+  background:none;color:#4e5d78;font-family:inherit;font-size:15px;cursor:pointer;
+  display:grid;place-items:center;transition:color .12s,background .12s;
+}
+.cellbtn:hover{color:var(--text);background:#111a2b}
+.cellbtn.hit{background:rgba(63,224,164,.22);color:var(--ok)}
+.cellbtn.miss{background:rgba(255,90,110,.2);color:var(--bad)}
+.timer{height:3px;background:var(--line);border-radius:2px;overflow:hidden;margin-bottom:13px}
+.timer i{display:block;height:100%;width:100%;background:var(--beam);transition:width .1s linear}
+.timer i.low{background:var(--bad)}
+
+/* ── ปุ่ม ── */
+.btn{
+  width:100%;padding:14px 12px;font-family:inherit;font-size:14px;font-weight:600;
+  letter-spacing:1.2px;color:var(--bg);background:var(--beam);border:none;border-radius:3px;
+  cursor:pointer;transition:filter .15s,transform .06s;
+}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:none;color:var(--dim);font-weight:400;letter-spacing:0;font-size:11.5px;padding:10px}
+.btn.ghost:hover{color:var(--beam);filter:none}
+.btn[disabled]{opacity:.45;cursor:default}
+:focus-visible{outline:1px solid var(--beam);outline-offset:3px}
+
+/* ── โปรไฟล์ที่ปลดล็อกแล้ว ── */
 header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.name{font-size:27px;font-weight:600;letter-spacing:-.6px;color:var(--bright);margin:0;line-height:1.2}
-.live{
-  display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ok);
-  border:1px solid rgba(63,224,164,.28);border-radius:99px;padding:2px 9px;
-  background:rgba(63,224,164,.06);
-}
+.name{font-size:28px;font-weight:600;letter-spacing:-.6px;color:var(--bright);margin:0;line-height:1.2}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ok);
+  border:1px solid rgba(63,224,164,.28);border-radius:99px;padding:2px 9px;background:rgba(63,224,164,.06)}
 .pulse{width:6px;height:6px;border-radius:50%;background:var(--ok);
   box-shadow:0 0 0 0 rgba(63,224,164,.6);animation:ping 2.4s ease-out infinite}
 @keyframes ping{
@@ -61,34 +135,29 @@ header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
   70%{box-shadow:0 0 0 7px rgba(63,224,164,0)}
   100%{box-shadow:0 0 0 0 rgba(63,224,164,0)}
 }
+.tag{margin:10px 0 0;font-size:12.5px;color:var(--dim)}
+.tag b{color:var(--text);font-weight:400}
 
-.panel{margin-top:24px;background:var(--panel);border:1px solid var(--line);border-radius:3px;overflow:hidden}
-.panel h2{margin:0;padding:8px 13px;font-size:10.5px;font-weight:500;color:var(--dim);
-  letter-spacing:.9px;border-bottom:1px solid var(--line)}
+.readout{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
+.cellv{background:var(--panel);padding:11px 13px}
+.cellv .k{font-size:10px;color:var(--dim);letter-spacing:.6px}
+.cellv .v{font-size:17px;color:var(--bright);margin-top:2px}
+.cellv .v small{font-size:11px;color:var(--dim)}
 
-.meters{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
-.meter{background:var(--panel);padding:13px}
-.meter .k{font-size:10.5px;color:var(--dim);letter-spacing:.6px}
-.meter .v{font-size:20px;color:var(--bright);letter-spacing:-.3px;margin-top:3px}
-.meter .v small{font-size:12px;color:var(--dim);letter-spacing:0}
-#spark{display:block;width:100%;height:38px;margin-top:6px}
-
-.svc{display:flex;align-items:center;gap:11px;padding:9px 13px;border-top:1px solid var(--line)}
-.svc:first-of-type{border-top:none}
-.led{width:7px;height:7px;border-radius:50%;flex:none;background:var(--ok);
-  box-shadow:0 0 8px rgba(63,224,164,.75);animation:breathe 3.6s ease-in-out infinite}
-.svc.warn .led{background:var(--warn);box-shadow:0 0 8px rgba(255,182,72,.75)}
-.svc.busy .led{background:var(--beam);box-shadow:0 0 9px rgba(106,169,255,.85);animation-duration:1.5s}
-.svc.busy .state{color:var(--beam)}
-@keyframes breathe{0%,100%{opacity:1}50%{opacity:.42}}
-.svc .label{flex:1;color:var(--text)}
-.svc .state{color:var(--ok);font-size:11.5px}
-.svc.warn .state{color:var(--warn)}
-
-#out{
-  padding:12px 13px;font-size:12.5px;min-height:150px;max-height:340px;
-  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+.menu{display:flex;flex-direction:column}
+.item{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;
+  padding:13px;font-family:inherit;font-size:13.5px;text-align:left;color:var(--text);
+  background:none;border:none;border-top:1px solid var(--line);cursor:pointer;
+  transition:background .15s,color .15s;
 }
+.item:first-child{border-top:none}
+.item:hover,.item:focus-visible{background:#111a2b;color:var(--bright)}
+.item .go{color:var(--beam);font-size:14px;flex:none}
+
+#out{padding:12px 13px;font-size:12.5px;max-height:300px;overflow-y:auto;
+  overscroll-behavior:contain;scrollbar-width:thin;border-top:1px solid var(--line)}
+#out:empty{display:none}
 #out::-webkit-scrollbar{width:5px}
 #out::-webkit-scrollbar-thumb{background:var(--line)}
 #out div{white-space:pre-wrap;word-break:break-word;min-height:1.6em}
@@ -99,84 +168,121 @@ header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 #out .okline{color:var(--ok)}
 #out .sys{color:#3c485c;font-size:11.5px}
 
-.chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 13px 12px}
-.chip{
-  font-family:inherit;font-size:11.5px;color:var(--text);cursor:pointer;
-  background:#111827;border:1px solid var(--line);border-radius:99px;padding:5px 11px;
-  transition:border-color .16s,color .16s,background .16s;
-}
-.chip:hover,.chip:focus-visible{border-color:rgba(106,169,255,.55);color:var(--bright);background:#141d31}
-.chip:active{transform:translateY(1px)}
-
+.typetoggle{width:100%;padding:10px 13px;font-family:inherit;font-size:11px;color:var(--dim);
+  background:none;border:none;border-top:1px solid var(--line);cursor:pointer;text-align:center}
+.typetoggle:hover{color:var(--beam)}
 .prompt{display:flex;align-items:center;gap:8px;padding:10px 13px;border-top:1px solid var(--line)}
 .prompt span{color:var(--dim);flex:none}
-.prompt input{
-  flex:1;background:none;border:none;outline:none;color:var(--bright);
-  font-family:inherit;font-size:13px;padding:0;min-width:0;caret-color:var(--beam);
-}
+.prompt input{flex:1;background:none;border:none;outline:none;color:var(--bright);
+  font-family:inherit;font-size:13px;padding:0;min-width:0;caret-color:var(--beam)}
 .prompt input::placeholder{color:#3c485c}
 
-.cta{
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-  margin-top:20px;padding:14px 15px;text-decoration:none;
+.cta{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-top:18px;padding:14px 15px;text-decoration:none;
   border:1px solid var(--line);border-radius:3px;background:var(--panel);
-  color:var(--bright);transition:border-color .18s,background .18s;
-}
+  color:var(--bright);transition:border-color .18s,background .18s}
 .cta:hover,.cta:focus-visible{border-color:rgba(106,169,255,.5);background:#101728}
-.cta .sub{display:block;font-size:11px;color:var(--dim);margin-top:2px}
+.cta .subt{display:block;font-size:11px;color:var(--dim);margin-top:2px}
 .cta .arrow{color:var(--beam);font-size:15px}
-:focus-visible{outline:1px solid var(--beam);outline-offset:3px}
 
 footer{display:flex;justify-content:space-between;gap:10px;margin-top:16px;font-size:10.5px;color:#3c485c}
 
-@media (max-width:400px){
-  .meters{grid-template-columns:1fr}
-  .name{font-size:23px}
-}
-@media (prefers-reduced-motion:reduce){
-  *{animation:none!important;transition:none!important}
-  #beam{display:none}
-}
+.fade{animation:fade .5s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div id="beam" aria-hidden="true"></div>
-
 <div class="wrap">
 
+<!-- ═══════ จอล็อก ═══════ -->
+<div id="lockView">
+  <div class="lockhead">
+    <h1 class="denied" id="deniedTxt">ACCESS DENIED</h1>
+    <p class="sub" id="lockSub">ระบบล็อกอยู่ 3 ชั้น ผ่านได้ถึงจะรู้ว่าใคร</p>
+  </div>
+  <div class="layers"><i id="L0"></i><i id="L1"></i><i id="L2"></i></div>
+
+  <!-- หน้าเริ่ม -->
+  <section class="panel" id="introPanel">
+    <h2><span>security gate</span><b>locked</b></h2>
+    <div class="pad">
+      <p class="howto">3 ด่าน ไม่ต้องพิมพ์อะไรเลย แตะอย่างเดียว<br>พลาดได้ด่านละ 2 ครั้ง</p>
+      <button class="btn" id="startBtn">เริ่มปลดล็อก</button>
+      <button class="btn ghost" id="skipBtn">ข้ามไปก่อน ขอดูเฉยๆ</button>
+    </div>
+  </section>
+
+  <!-- ด่าน 1 -->
+  <section class="panel hidden" id="s1">
+    <h2><span>layer 1 — signal</span><b id="s1n">1 / 3</b></h2>
+    <div class="pad">
+      <p class="howto">กดให้เข็มหยุดในกรอบเขียว — 3 ครั้ง กรอบจะแคบลงเรื่อยๆ</p>
+      <div class="track" id="track">
+        <div class="ticks"></div>
+        <div class="zone" id="zone"></div>
+        <div class="needle" id="needle"></div>
+      </div>
+      <div class="lives" id="lv1"><i></i><i></i><i></i></div>
+      <div class="verdict" id="v1">&nbsp;</div>
+      <button class="btn" id="stopBtn">STOP</button>
+      <button class="btn ghost skip">ข้ามไปก่อน ขอดูเฉยๆ</button>
+    </div>
+  </section>
+
+  <!-- ด่าน 2 -->
+  <section class="panel hidden" id="s2">
+    <h2><span>layer 2 — sequence</span><b id="s2n">1 / 3</b></h2>
+    <div class="pad">
+      <p class="howto">ดูไฟที่กะพริบ แล้วกดตามลำดับเดิม</p>
+      <div class="pads" id="pads"></div>
+      <div class="lives" id="lv2"><i></i><i></i><i></i></div>
+      <div class="verdict" id="v2">&nbsp;</div>
+      <button class="btn ghost skip">ข้ามไปก่อน ขอดูเฉยๆ</button>
+    </div>
+  </section>
+
+  <!-- ด่าน 3 -->
+  <section class="panel hidden" id="s3">
+    <h2><span>layer 3 — firewall</span><b id="s3n">1 / 3</b></h2>
+    <div class="pad">
+      <p class="howto" id="h3">หาตัวที่ไม่เหมือนชาวบ้าน ก่อนเวลาหมด</p>
+      <div class="timer"><i id="tbar"></i></div>
+      <div class="hunt" id="hunt"></div>
+      <div class="lives" id="lv3"><i></i><i></i><i></i></div>
+      <div class="verdict" id="v3">&nbsp;</div>
+      <button class="btn ghost skip">ข้ามไปก่อน ขอดูเฉยๆ</button>
+    </div>
+  </section>
+</div>
+
+<!-- ═══════ โปรไฟล์ ═══════ -->
+<div id="mainView" class="hidden">
   <header>
     <h1 class="name">b.xlle.x</h1>
     <span class="live"><i class="pulse"></i>online</span>
   </header>
+  <p class="tag"><b>สาย IT</b> — ดูแลระบบมาเยอะ แต่ก็อยากดูแลคุณด้วย</p>
 
-  <section class="panel" aria-label="ตัวเลขระบบ">
-    <div class="meters">
-      <div class="meter">
-        <div class="k">session uptime</div>
-        <div class="v" id="uptime">00:00:00</div>
-      </div>
-      <div class="meter">
-        <div class="k">latency</div>
-        <div class="v"><span id="ms">--</span><small> ms</small></div>
-        <canvas id="spark" width="520" height="76" aria-hidden="true"></canvas>
-      </div>
+  <section class="panel">
+    <h2><span>session</span><b id="accessTag">access granted</b></h2>
+    <div class="readout">
+      <div class="cellv"><div class="k">uptime</div><div class="v" id="uptime">00:00:00</div></div>
+      <div class="cellv"><div class="k">latency</div><div class="v"><span id="ms">--</span><small> ms</small></div></div>
+      <div class="cellv"><div class="k">clearance</div><div class="v" id="clear">—</div></div>
+      <div class="cellv"><div class="k">unlock time</div><div class="v" id="utime">—</div></div>
     </div>
   </section>
 
-  <section class="panel" aria-label="สถานะระบบ">
-    <h2>service status</h2>
-    <div class="svc"><i class="led"></i><span class="label">servers</span><span class="state">operational</span></div>
-    <div class="svc"><i class="led"></i><span class="label">networks</span><span class="state">operational</span></div>
-    <div class="svc"><i class="led"></i><span class="label">web apps</span><span class="state">operational</span></div>
-    <div class="svc"><i class="led"></i><span class="label">automation</span><span class="state">operational</span></div>
-    <div class="svc warn" id="relRow"><i class="led"></i><span class="label">relationship</span><span class="state" id="relState">waiting for input</span></div>
-  </section>
-
-  <section class="panel" aria-label="คอนโซล">
-    <h2>console</h2>
+  <section class="panel">
+    <h2><span>console</span></h2>
+    <div class="menu" id="menu"></div>
     <div id="out" aria-live="polite"></div>
-    <div class="chips" id="chips"></div>
-    <div class="prompt">
+    <button class="typetoggle" id="typeToggle">หรือพิมพ์คำสั่งเอง</button>
+    <div class="prompt hidden" id="promptRow">
       <span aria-hidden="true">&gt;</span>
       <input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
              placeholder="พิมพ์อะไรก็ได้ แล้วกด enter" aria-label="ช่องพิมพ์คำสั่ง">
@@ -184,7 +290,7 @@ footer{display:flex;justify-content:space-between;gap:10px;margin-top:16px;font-
   </section>
 
   <a class="cta" href="https://www.tiktok.com/@b.xlle.x" target="_blank" rel="noopener">
-    <span>tiktok<span class="sub">@b.xlle.x</span></span>
+    <span>tiktok<span class="subt">@b.xlle.x</span></span>
     <span class="arrow" aria-hidden="true">↗</span>
   </a>
 
@@ -192,6 +298,7 @@ footer{display:flex;justify-content:space-between;gap:10px;margin-top:16px;font-
     <span id="clock">bkk</span>
     <span>built by hand</span>
   </footer>
+</div>
 
 </div>
 
@@ -199,66 +306,315 @@ footer{display:flex;justify-content:space-between;gap:10px;margin-top:16px;font-
 (function(){
 var $=function(i){return document.getElementById(i)};
 var reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-var pad=function(n){return String(n).padStart(2,'0')};
+var pad2=function(n){return String(n).padStart(2,'0')};
+var LS={get:function(k){try{return localStorage.getItem(k)}catch(e){return null}},
+        set:function(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 
-/* ── uptime / นาฬิกา ── */
-var t0=Date.now();
+/* ── นาฬิกา / uptime / ping ── */
+var t0=Date.now(), lastMs=0, synth=18, startedAt=null, cleared='—';
 setInterval(function(){
   var s=Math.floor((Date.now()-t0)/1000);
-  $('uptime').textContent=pad(Math.floor(s/3600))+':'+pad(Math.floor(s%3600/60))+':'+pad(s%60);
+  var el=$('uptime'); if(el) el.textContent=pad2(Math.floor(s/3600))+':'+pad2(Math.floor(s%3600/60))+':'+pad2(s%60);
 },1000);
 setInterval(function(){
-  var d=new Date();
-  $('clock').textContent='bkk · '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+  var d=new Date(), el=$('clock');
+  if(el) el.textContent='bkk · '+pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds());
 },1000);
-
-/* ── latency วัดจริง ── */
-var data=[],MAX=60,synth=18,lastMs=0;
-function push(v){
-  if(v===null||!isFinite(v)){
-    synth+=(Math.random()-.5)*6; synth=Math.min(48,Math.max(9,synth)); v=synth;
-  }
+function pushMs(v){
+  if(v===null||!isFinite(v)){ synth+=(Math.random()-.5)*6; synth=Math.min(48,Math.max(9,synth)); v=synth; }
   lastMs=Math.round(Math.min(v,400));
-  data.push(lastMs); if(data.length>MAX)data.shift();
-  $('ms').textContent=lastMs; draw();
+  var el=$('ms'); if(el) el.textContent=lastMs;
 }
 function measure(){
   var st=performance.now();
   fetch(location.pathname+'?_='+st,{method:'HEAD',cache:'no-store'})
-    .then(function(){push(performance.now()-st)})
-    .catch(function(){push(null)});
+    .then(function(){pushMs(performance.now()-st)})
+    .catch(function(){pushMs(null)});
 }
-var cv=$('spark'),cx=cv.getContext('2d');
-function draw(){
-  var w=cv.width,h=cv.height; cx.clearRect(0,0,w,h);
-  if(data.length<2)return;
-  var hi=Math.max.apply(null,data),lo=Math.min.apply(null,data);
-  var span=Math.max(hi-lo,8),p=8;
-  var pt=function(i){return [i*(w/(MAX-1)), h-p-((data[i]-lo)/span)*(h-p*2)]};
-  var g=cx.createLinearGradient(0,0,0,h);
-  g.addColorStop(0,'rgba(106,169,255,.30)'); g.addColorStop(1,'rgba(106,169,255,0)');
-  cx.beginPath(); cx.moveTo(0,h);
-  for(var i=0;i<data.length;i++){var a=pt(i);cx.lineTo(a[0],a[1])}
-  cx.lineTo(pt(data.length-1)[0],h); cx.closePath(); cx.fillStyle=g; cx.fill();
-  cx.beginPath();
-  for(var j=0;j<data.length;j++){var b=pt(j); j?cx.lineTo(b[0],b[1]):cx.moveTo(b[0],b[1])}
-  cx.strokeStyle='#6aa9ff'; cx.lineWidth=1.5; cx.lineJoin='round'; cx.lineCap='round'; cx.stroke();
-  var L=pt(data.length-1);
-  cx.beginPath(); cx.arc(L[0]-1,L[1],2.4,0,Math.PI*2); cx.fillStyle='#9cc6ff'; cx.fill();
-}
-for(var k=0;k<8;k++)push(null);
-measure(); setInterval(measure,2200);
+pushMs(null); measure(); setInterval(measure,2200);
 
-/* ══ คอนโซล ══ */
-var out=$('out'),input=$('in');
-var busy=false,history=[],hIdx=0;
+/* ── เสียงบี๊บเบาๆ ── */
+var AC=null;
+function beep(freq,dur,vol){
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    var o=AC.createOscillator(), g=AC.createGain();
+    o.type='square'; o.frequency.value=freq;
+    g.gain.setValueAtTime(vol||0.035,AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+(dur||.1));
+    o.connect(g); g.connect(AC.destination); o.start(); o.stop(AC.currentTime+(dur||.1));
+  }catch(e){}
+}
+
+/* ══════════════ ระบบด่าน ══════════════ */
+var stage=0, lives=3, runStart=0;
+
+function setLayer(i,cls){ var el=$('L'+i); if(el) el.className=cls||''; }
+function showLives(id){
+  var box=$(id);
+  for(var i=0;i<3;i++) box.children[i].className = (i<lives?'':'gone');
+}
+function loseLife(id,msgEl,txt,onDead){
+  lives--; showLives(id);
+  msgEl.innerHTML='<span class="bad">'+txt+'</span>';
+  beep(180,.18,.05);
+  $('lockView').classList.add('shake');
+  setTimeout(function(){ $('lockView').classList.remove('shake') },320);
+  if(lives<=0){ setTimeout(onDead,700); return true; }
+  return false;
+}
+function openStage(n){
+  ['introPanel','s1','s2','s3'].forEach(function(id){ $(id).classList.add('hidden') });
+  lives=3;
+  for(var i=0;i<3;i++) setLayer(i, i<n-1?'on':(i===n-1?'cur':''));
+  if(n===1){ $('s1').classList.remove('hidden'); $('s1').classList.add('fade'); startStage1(); }
+  if(n===2){ $('s2').classList.remove('hidden'); $('s2').classList.add('fade'); startStage2(); }
+  if(n===3){ $('s3').classList.remove('hidden'); $('s3').classList.add('fade'); startStage3(); }
+}
+
+/* ─── ด่าน 1: จับจังหวะ ─── */
+var s1={round:0,raf:0,pos:0,dir:1,speed:0,zs:0,zw:0,running:false};
+var ZW=[24,16,10], SP=[0.055,0.075,0.1];
+function layoutZone(){
+  $('zone').style.left=s1.zs+'%';
+  $('zone').style.width=s1.zw+'%';
+}
+function s1Round(){
+  s1.zw=ZW[s1.round];
+  s1.zs=12+Math.random()*(76-s1.zw);
+  s1.speed=SP[s1.round];
+  s1.pos=0; s1.dir=1; s1.running=true;
+  $('s1n').textContent=(s1.round+1)+' / 3';
+  layoutZone();
+  $('stopBtn').disabled=false;
+  $('stopBtn').textContent='STOP';
+  var lastT=performance.now();
+  cancelAnimationFrame(s1.raf);
+  (function loop(now){
+    var dt=Math.min(now-lastT,50); lastT=now;
+    if(s1.running){
+      s1.pos+=s1.dir*s1.speed*dt;
+      if(s1.pos>=100){s1.pos=100;s1.dir=-1}
+      if(s1.pos<=0){s1.pos=0;s1.dir=1}
+      $('needle').style.left=s1.pos+'%';
+    }
+    s1.raf=requestAnimationFrame(loop);
+  })(lastT);
+}
+function startStage1(){ s1.round=0; showLives('lv1'); $('v1').innerHTML='&nbsp;'; s1Round(); }
+$('stopBtn').onclick=function(){
+  if(!s1.running)return;
+  s1.running=false;
+  var hit = s1.pos>=s1.zs && s1.pos<=s1.zs+s1.zw;
+  if(hit){
+    beep(880,.12);
+    s1.round++;
+    $('v1').innerHTML='<span class="good">LOCKED — เหลืออีก '+(3-s1.round)+'</span>';
+    if(s1.round>=3){
+      cancelAnimationFrame(s1.raf);
+      $('v1').innerHTML='<span class="good">ชั้นที่ 1 ปลดแล้ว</span>';
+      $('stopBtn').disabled=true;
+      setTimeout(function(){ openStage(2) },900);
+      return;
+    }
+    setTimeout(s1Round,620);
+  }else{
+    var dead=loseLife('lv1',$('v1'),'พลาด — เข็มอยู่นอกกรอบ',function(){
+      $('v1').innerHTML='<span class="bad">ชั้นที่ 1 รีเซ็ต</span>';
+      setTimeout(startStage1,600);
+    });
+    if(!dead) setTimeout(s1Round,700);
+  }
+};
+
+/* ─── ด่าน 2: จำลำดับ ─── */
+var s2={seq:[],input:[],round:0,playing:false};
+var LEN=[3,4,5], GAP=[560,460,370];
+var padEls=[];
+(function buildPads(){
+  var box=$('pads');
+  for(var i=0;i<6;i++){
+    var b=document.createElement('button');
+    b.className='padbtn'; b.type='button';
+    b.innerHTML='<b>'+pad2(i+1)+'</b>';
+    (function(idx){ b.onclick=function(){ s2Tap(idx) } })(i);
+    box.appendChild(b); padEls.push(b);
+  }
+})();
+function flash(i,cls,ms){
+  padEls[i].classList.add(cls||'lit');
+  setTimeout(function(){ padEls[i].classList.remove(cls||'lit') },ms||260);
+}
+function startStage2(){ s2.round=0; showLives('lv2'); $('v2').innerHTML='&nbsp;'; s2Round(); }
+function s2Round(){
+  $('s2n').textContent=(s2.round+1)+' / 3';
+  s2.seq=[]; s2.input=[];
+  var n=LEN[s2.round];
+  for(var i=0;i<n;i++) s2.seq.push(Math.floor(Math.random()*6));
+  $('v2').textContent='ดูให้ดี...';
+  s2.playing=true;
+  var g=GAP[s2.round], i2=0;
+  setTimeout(function play(){
+    if(i2>=s2.seq.length){
+      s2.playing=false;
+      $('v2').textContent='ถึงตาคุณแล้ว';
+      return;
+    }
+    flash(s2.seq[i2],'lit',g*0.55);
+    beep(520+s2.seq[i2]*70,.09);
+    i2++;
+    setTimeout(play,g);
+  },620);
+}
+function s2Tap(i){
+  if(s2.playing)return;
+  var k=s2.input.length;
+  if(s2.seq[k]===i){
+    s2.input.push(i); flash(i,'good',180); beep(760,.07);
+    if(s2.input.length===s2.seq.length){
+      s2.round++;
+      if(s2.round>=3){
+        $('v2').innerHTML='<span class="good">ชั้นที่ 2 ปลดแล้ว</span>';
+        setTimeout(function(){ openStage(3) },900);
+        return;
+      }
+      $('v2').innerHTML='<span class="good">ถูกต้อง — ด่านต่อไป</span>';
+      setTimeout(s2Round,800);
+    }
+  }else{
+    flash(i,'bad',300);
+    var dead=loseLife('lv2',$('v2'),'ลำดับผิด',function(){
+      $('v2').innerHTML='<span class="bad">ชั้นที่ 2 รีเซ็ต</span>';
+      setTimeout(startStage2,600);
+    });
+    if(!dead) setTimeout(function(){ s2.input=[]; s2Round() },700);
+  }
+}
+
+/* ─── ด่าน 3: หาตัวต่าง ─── */
+var s3={round:0,timer:0,t:0,limit:0,answer:-1,alive:false};
+var ROUNDS3=[
+  {n:5,time:7000,base:'0',odd:'O'},
+  {n:6,time:6000,base:'1',odd:'l'},
+  {n:7,time:5000,base:'8',odd:'B'}
+];
+function startStage3(){ s3.round=0; showLives('lv3'); $('v3').innerHTML='&nbsp;'; s3Round(); }
+function s3Round(){
+  var R=ROUNDS3[s3.round];
+  $('s3n').textContent=(s3.round+1)+' / 3';
+  $('h3').textContent='มีตัวหนึ่งไม่เหมือนตัวอื่น หาให้เจอก่อนแถบจะหมด';
+  var box=$('hunt');
+  box.innerHTML='';
+  box.style.gridTemplateColumns='repeat('+R.n+',1fr)';
+  box.style.maxWidth=(R.n*40)+'px';
+  var total=R.n*R.n;
+  s3.answer=Math.floor(Math.random()*total);
+  for(var i=0;i<total;i++){
+    var b=document.createElement('button');
+    b.className='cellbtn'; b.type='button';
+    b.textContent=(i===s3.answer)?R.odd:R.base;
+    (function(idx,el){ el.onclick=function(){ s3Tap(idx,el) } })(i,b);
+    box.appendChild(b);
+  }
+  s3.alive=true; s3.t=R.time; s3.limit=R.time;
+  $('v3').textContent='เวลาเดินแล้ว';
+  clearInterval(s3.timer);
+  var bar=$('tbar'); bar.className=''; bar.style.width='100%';
+  s3.timer=setInterval(function(){
+    s3.t-=100;
+    var p=Math.max(0,s3.t/s3.limit*100);
+    bar.style.width=p+'%';
+    if(p<30) bar.className='low';
+    if(s3.t<=0){
+      clearInterval(s3.timer); s3.alive=false;
+      var el=$('hunt').children[s3.answer]; if(el) el.classList.add('hit');
+      var dead=loseLife('lv3',$('v3'),'หมดเวลา — มันอยู่ตรงนั้น',function(){
+        $('v3').innerHTML='<span class="bad">ชั้นที่ 3 รีเซ็ต</span>';
+        setTimeout(startStage3,900);
+      });
+      if(!dead) setTimeout(s3Round,1100);
+    }
+  },100);
+}
+function s3Tap(i,el){
+  if(!s3.alive)return;
+  if(i===s3.answer){
+    s3.alive=false; clearInterval(s3.timer);
+    el.classList.add('hit'); beep(900,.12);
+    s3.round++;
+    if(s3.round>=3){
+      $('v3').innerHTML='<span class="good">ชั้นสุดท้ายปลดแล้ว</span>';
+      setTimeout(unlock,900);
+      return;
+    }
+    $('v3').innerHTML='<span class="good">เจอแล้ว — ด่านต่อไป</span>';
+    setTimeout(s3Round,850);
+  }else{
+    el.classList.add('miss');
+    setTimeout(function(){ el.classList.remove('miss') },300);
+    var dead=loseLife('lv3',$('v3'),'ไม่ใช่ตัวนั้น',function(){
+      clearInterval(s3.timer); s3.alive=false;
+      $('v3').innerHTML='<span class="bad">ชั้นที่ 3 รีเซ็ต</span>';
+      setTimeout(startStage3,900);
+    });
+    if(dead){ clearInterval(s3.timer); s3.alive=false; }
+  }
+}
+
+/* ══════════ ปลดล็อก ══════════ */
+function unlock(skipped){
+  cancelAnimationFrame(s1.raf); clearInterval(s3.timer);
+  for(var i=0;i<3;i++) setLayer(i,'on');
+  $('deniedTxt').textContent=skipped?'ACCESS GRANTED':'ACCESS GRANTED';
+  $('deniedTxt').className='denied ok';
+  $('lockSub').textContent=skipped?'เข้าได้เลย ไม่ว่ากัน':'ผ่านครบ 3 ชั้น';
+  beep(660,.1); setTimeout(function(){beep(880,.14)},130);
+
+  var secs=runStart?Math.round((Date.now()-runStart)/1000):0;
+  cleared=skipped?'guest':'level 3';
+  LS.set('bxllex_unlocked','1');
+  if(!skipped){
+    var best=LS.get('bxllex_best');
+    if(!best||secs<parseInt(best,10)) LS.set('bxllex_best',secs);
+  }
+
+  setTimeout(function(){
+    $('lockView').classList.add('hidden');
+    $('mainView').classList.remove('hidden');
+    $('mainView').classList.add('fade');
+    $('clear').textContent=skipped?'guest':'level 3';
+    $('accessTag').textContent=skipped?'guest access':'access granted';
+    $('utime').textContent=skipped?'—':(secs+'s');
+    var b=LS.get('bxllex_best');
+    boot(skipped,secs,b);
+  },1100);
+}
+
+$('startBtn').onclick=function(){ runStart=Date.now(); beep(620,.08); openStage(1); };
+Array.prototype.forEach.call(document.querySelectorAll('.skip'),function(b){
+  b.onclick=function(){ unlock(true) };
+});
+$('skipBtn').onclick=function(){ unlock(true) };
+
+/* เคยปลดล็อกแล้ว → ให้ทางลัด */
+if(LS.get('bxllex_unlocked')==='1'){
+  $('lockSub').textContent='เคยผ่านมาแล้วนี่ จะเล่นอีกรอบก็ได้';
+  $('startBtn').textContent='เล่นอีกรอบ';
+  var again=document.createElement('button');
+  again.className='btn ghost'; again.textContent='เข้าเลย ไม่ต้องเล่น';
+  again.onclick=function(){ unlock(true) };
+  $('skipBtn').replaceWith(again);
+}
+
+/* ══════════════ คอนโซล ══════════════ */
+var out=$('out'), input=$('in');
+var busy=false, history=[], hIdx=0;
 
 function line(text,cls){
   var d=document.createElement('div');
   if(cls)d.className=cls;
   d.textContent=text;
-  out.appendChild(d);
-  out.scrollTop=out.scrollHeight;
+  out.appendChild(d); out.scrollTop=out.scrollHeight;
   return d;
 }
 function wait(ms){return new Promise(function(r){setTimeout(r,reduced?0:ms)})}
@@ -283,24 +639,51 @@ async function say(lines){
   }
 }
 
-/* ── คำสั่ง ── */
-var CMDS={};
+function greetByHour(){
+  var h=new Date().getHours();
+  if(h===0)  return 'เที่ยงคืนแล้ว ระบบยังไม่ปิด';
+  if(h<5)    return 'ตี'+h+'แล้ว ยังไม่นอนอีกเหรอ';
+  if(h<7)    return 'เช้ามากเลยนะ ระบบเพิ่งตื่นเหมือนกัน';
+  if(h<11)   return 'เช้านี้ระบบตื่นก่อนคุณอีก';
+  if(h<13)   return 'เที่ยงแล้ว กินข้าวหรือยัง';
+  if(h<16)   return 'บ่ายแล้ว ระบบก็เริ่มง่วงเหมือนกัน';
+  if(h<19)   return 'เย็นแล้ว วันนี้เป็นยังไงบ้าง';
+  if(h<22)   return 'ค่ำแล้ว ว่างพอดีเลยใช่ไหม';
+  return 'ดึกแล้วนะ แต่ระบบยังเปิดอยู่';
+}
 
+async function boot(skipped,secs,best){
+  if(skipped){
+    await say([
+      ['[system] เข้าแบบ guest ไม่ว่ากัน','sys'],
+      ['[system] '+greetByHour(),'sys'],
+      620,
+      ['ไม่เล่นก็ได้ แต่ข้างในมีอะไรมากกว่านี้นะ','hi',26]
+    ]);
+  }else{
+    await say([
+      ['[system] ปลดล็อกครบ 3 ชั้น','okline'],
+      ['[system] ใช้เวลา '+secs+' วินาที'+(best&&parseInt(best,10)===secs?'  (สถิติใหม่)':''),'sys'],
+      ['[system] '+greetByHour(),'sys'],
+      620,
+      'คนส่วนใหญ่กดข้ามไปแล้วตั้งแต่ด่านแรก',
+      460,
+      ['แต่คุณอยู่จนจบ','hi',26]
+    ]);
+  }
+}
+
+var CMDS={};
 CMDS.whoami=function(){
   return say([
-    ['b.xlle.x','hi'],
-    'สาย IT',
-    '',
-    260,
-    'ดูแลระบบมาเยอะ',
-    440,
+    ['b.xlle.x','hi'],'สาย IT','',260,
+    'ดูแลระบบมาเยอะ',440,
     ['แต่ก็อยากดูแลคุณด้วย','hi',26]
   ]);
 };
-
 CMDS.scan=async function(){
   var n=navigator,s=screen,ua=n.userAgent;
-  await say([['[scan] กำลังอ่านข้อมูลจากเบราว์เซอร์ของคุณ...','sys'],460]);
+  await say([['[scan] กำลังอ่านข้อมูลเครื่องคุณ...','sys'],460]);
   var os='ไม่รู้จัก';
   if(/Android/i.test(ua))os='Android';
   else if(/iPhone|iPad|iPod/i.test(ua))os='iOS';
@@ -319,208 +702,156 @@ CMDS.scan=async function(){
     'ขนาดหน้าจอ       '+s.width+' x '+s.height,
     'ซีพียู            '+(n.hardwareConcurrency||'?')+' คอร์',
     'ภาษา             '+(n.language||'?'),
-    'โซนเวลา          '+(Intl.DateTimeFormat().resolvedOptions().timeZone||'?'),
-    'ระบบสัมผัส        '+('ontouchstart' in window?'มี':'ไม่มี')
+    'โซนเวลา          '+(Intl.DateTimeFormat().resolvedOptions().timeZone||'?')
   ];
   for(var i=0;i<rows.length;i++){ await type(rows[i]); await wait(70); }
   if(n.getBattery){
-    try{
-      var b=await n.getBattery();
+    try{ var b=await n.getBattery();
       await type('แบตเตอรี่         '+Math.round(b.level*100)+'%'+(b.charging?' (กำลังชาร์จ)':''));
     }catch(e){}
   }
   await wait(420);
   await say([
     '',
-    ['ทั้งหมดนี้เบราว์เซอร์คุณบอกมาเอง ไม่ได้ไปล้วงที่ไหน','sys'],
-    ['และไม่ได้เก็บไว้ด้วย ปิดแท็บก็หายหมด','sys'],
+    ['เบราว์เซอร์คุณบอกมาเอง ไม่ได้ไปล้วง และไม่ได้เก็บไว้','sys'],
     520,
     ['รู้จักเครื่องคุณหมดแล้ว เหลือแค่ยังไม่รู้จักคุณ','hi',26]
   ]);
 };
-
 CMDS.ping=async function(){
-  await type('PING b.xlle.x — ส่งไป 4 ครั้ง','sys');
-  for(var i=1;i<=4;i++){
-    await wait(440);
-    await type('  ครั้งที่ '+i+'   ตอบกลับใน '+lastMs+' ms','okline');
-  }
+  await type('PING — ส่งไป 4 ครั้ง','sys');
+  for(var i=1;i<=4;i++){ await wait(440); await type('  ครั้งที่ '+i+'   ตอบกลับใน '+lastMs+' ms','okline'); }
   await wait(340);
   var v=lastMs<40?'เน็ตดีมาก':(lastMs<120?'เน็ตใช้ได้เลย':'เน็ตช้าไปนิดนะ');
-  await say([
-    '',
-    v+' — ส่งไป 4 กลับมา 4 ไม่หายสักครั้ง',
-    480,
-    ['ส่งไปหาคุณกี่ครั้ง ก็อยากให้กลับมาแบบนี้','hi',26]
-  ]);
+  await say(['',v+' — ส่งไป 4 กลับมา 4 ไม่หายสักครั้ง',480,
+    ['ส่งไปหาคุณกี่ครั้ง ก็อยากให้กลับมาแบบนี้','hi',26]]);
 };
-
 CMDS.dontpress=function(){
-  return say([
-    ['[!] คำเตือนถูกเพิกเฉย','warnline'],
-    420,
-    'บอกแล้วว่าห้ามกด',
-    440,
-    ['แต่ก็ดี ชอบคนไม่ค่อยฟังอยู่พอดี','hi',26]
-  ]);
+  return say([['[!] คำเตือนถูกเพิกเฉย','warnline'],420,'บอกแล้วว่าห้ามกด',440,
+    ['แต่ก็ดี ชอบคนไม่ค่อยฟังอยู่พอดี','hi',26]]);
 };
-
+CMDS.replay=function(){
+  $('mainView').classList.add('hidden');
+  $('lockView').classList.remove('hidden');
+  $('deniedTxt').textContent='ACCESS DENIED';
+  $('deniedTxt').className='denied';
+  $('lockSub').textContent='เอาใหม่อีกรอบ';
+  ['s1','s2','s3'].forEach(function(id){ $(id).classList.add('hidden') });
+  $('introPanel').classList.remove('hidden');
+  for(var i=0;i<3;i++) setLayer(i,'');
+  out.innerHTML='';
+  window.scrollTo({top:0,behavior:reduced?'auto':'smooth'});
+  return Promise.resolve();
+};
+CMDS.score=function(){
+  var b=LS.get('bxllex_best');
+  return say([ b?('สถิติดีที่สุด '+b+' วินาที'):'ยังไม่มีสถิติ ลองเล่นดูสิ', 380,
+    ['เร็วกว่านี้ได้อีกไหม','hi',26]]);
+};
 CMDS.help=function(){
   return say([
     'คำสั่งที่พิมพ์ได้:',
     '  whoami    ใครทำเว็บนี้',
     '  scan      เว็บนี้รู้อะไรเกี่ยวกับคุณบ้าง',
     '  ping      วัดเน็ตของคุณจริงๆ',
-    '  uptime    เปิดหน้านี้ค้างไว้นานแค่ไหนแล้ว',
-    '  date      ตอนนี้กี่โมง',
-    '  clear     ล้างหน้าจอ',
-    '',
-    ['ยังมีอีกหลายคำสั่งที่ไม่ได้เขียนไว้ตรงนี้','sys'],
-    ['พิมพ์มั่วก็ได้ ระบบไม่ว่าอะไร','sys']
+    '  score     สถิติปลดล็อกของคุณ',
+    '  replay    เล่นด่านใหม่อีกรอบ',
+    '  clear     ล้างหน้าจอ','',
+    ['ยังมีคำสั่งที่ไม่ได้เขียนไว้ตรงนี้อีก พิมพ์มั่วก็ได้','sys']
   ]);
 };
-
 CMDS.uptime=function(){
   var s=Math.floor((Date.now()-t0)/1000);
-  return say([
-    'เปิดหน้านี้ค้างไว้ '+Math.floor(s/60)+' นาที '+(s%60)+' วินาที',
-    400,
-    ['นานกว่าที่คิดไว้นะเนี่ย','hi',26]
-  ]);
+  return say(['เปิดหน้านี้ค้างไว้ '+Math.floor(s/60)+' นาที '+(s%60)+' วินาที',400,
+    ['นานกว่าที่คิดไว้นะเนี่ย','hi',26]]);
 };
-
-CMDS.date=function(){
-  return say([new Date().toLocaleString('th-TH',{dateStyle:'full',timeStyle:'medium'})]);
-};
-
+CMDS.date=function(){ return say([new Date().toLocaleString('th-TH',{dateStyle:'full',timeStyle:'medium'})]); };
 CMDS.clear=function(){ out.innerHTML=''; return Promise.resolve(); };
-
-/* ── ของซ่อน ── */
-CMDS.sudo=function(){
-  return say([['b.xlle.x ไม่อยู่ในรายชื่อผู้มีสิทธิ์','warnline'],380,'เรื่องนี้จะถูกบันทึกไว้',400,['ล้อเล่น ไม่ได้บันทึกอะไรหรอก','sys']]);
-};
+CMDS.sudo=function(){ return say([['b.xlle.x ไม่อยู่ในรายชื่อผู้มีสิทธิ์','warnline'],380,'เรื่องนี้จะถูกบันทึกไว้',400,['ล้อเล่น ไม่ได้บันทึกอะไรหรอก','sys']]); };
 CMDS.exit=function(){ return say(['ปิดได้นะ',380,['แต่ไม่ต้องรีบก็ได้','hi',26]]); };
-CMDS.ls=function(){ return say(['about.txt    ping.log    feelings.db',300,['feelings.db เปิดไม่ได้ ไฟล์เสียมานานแล้ว','sys']]); };
+CMDS.ls=function(){ return say(['about.txt    gate.log    feelings.db',300,['feelings.db เปิดไม่ได้ ไฟล์เสียมานานแล้ว','sys']]); };
 CMDS.coffee=function(){ return say([['error: ไม่พบทรัพยากรที่ต้องการ','warnline'],340,'เติมก่อนแล้วค่อยมาใหม่']); };
-CMDS.hello=function(){ return say(['อ้าว ทักมาเลยเหรอ',360,['ระบบว่างอยู่ตลอดนะ','hi',26]]); };
+CMDS.hello=function(){ return say(['อ้าว ทักมาเลยเหรอ',360,['ผ่านประตูมาแล้วก็ทักได้เลย','hi',26]]); };
 CMDS.love=function(){ return say([['กำลังประมวลผล...','sys'],760,['ล้มเหลว ลองใหม่อีกครั้ง','warnline'],440,'ล้อเล่น ลองมาแล้ว ยังไม่ล้มสักที']); };
-CMDS.neofetch=function(){ return CMDS.scan(); };
 
 var ALIAS={
-  'help':'help','?':'help','ช่วย':'help','ช่วยด้วย':'help',
+  'help':'help','?':'help','ช่วย':'help',
   'whoami':'whoami','who':'whoami','ใคร':'whoami','นี่ใคร':'whoami',
-  'scan':'scan','neofetch':'neofetch',
-  'ping':'ping','uptime':'uptime','date':'date','time':'date',
-  'clear':'clear','cls':'clear',
+  'scan':'scan','neofetch':'scan','ping':'ping',
+  'score':'score','best':'score','replay':'replay','again':'replay','เล่นใหม่':'replay',
+  'uptime':'uptime','date':'date','time':'date','clear':'clear','cls':'clear',
   'exit':'exit','quit':'exit','ls':'ls','dir':'ls',
   'coffee':'coffee','กาแฟ':'coffee',
   'hi':'hello','hello':'hello','หวัดดี':'hello','สวัสดี':'hello',
   'love':'love','รัก':'love','จีบ':'love'
 };
 
-async function run(raw){
-  var cmd=String(raw||'').trim();
-  if(!cmd||busy)return;
-  busy=true; input.disabled=true;
-  history.push(cmd); hIdx=history.length;
-  line(cmd,'cmd');
-  await wait(190);
-
-  var key=cmd.toLowerCase(),fn=null;
-  if(/rm\s+-rf/.test(key)||key==='dontpress') fn=CMDS.dontpress;
-  else if(/^sudo\b/.test(key)) fn=CMDS.sudo;
-  else if(ALIAS[key]) fn=CMDS[ALIAS[key]];
-
-  if(fn) await fn();
-  else await freeInput(cmd);
-
-  line('','');
-  busy=false; input.disabled=false;
-}
-
-/* ── พิมพ์อะไรที่ไม่ใช่คำสั่ง = กรอกข้อมูลให้ relationship ── */
 var submitted=0;
 async function freeInput(text){
   submitted++;
-  var state=$('relState'), row=$('relRow');
-
   if(submitted===1){
-    await say([
-      ['[relationship] ได้รับข้อมูลแล้ว','sys'],
-      520,
-      ['[relationship] กำลังตรวจสอบ...','sys'],
-      780
-    ]);
-    state.textContent='reviewing your input';
-    row.classList.remove('warn'); row.classList.add('busy');
-    await say([
-      ['สถานะเปลี่ยนเป็น: reviewing your input','okline'],
-      460,
-      ['เห็นไหม บรรทัดข้างบนเปลี่ยนแล้วนะ','sys'],
-      520,
+    return say([
+      ['[system] ได้รับข้อมูลแล้ว','sys'],520,
+      ['[system] กำลังบันทึกเข้าแฟ้ม...','sys'],760,
       ['"'+text+'" — จำไว้แล้ว','hi',26]
     ]);
-    return;
   }
-
   if(submitted===2){
-    await say([
-      ['[relationship] ได้รับข้อมูลเพิ่ม','sys'],
-      460,
-      'ข้อมูลซ้ำ แต่ก็รับไว้อีกรอบ',
-      480,
-      ['ชอบคนที่พิมพ์มาสองครั้ง','hi',26]
-    ]);
-    return;
+    return say([['[system] ได้รับข้อมูลเพิ่ม','sys'],460,'ข้อมูลซ้ำ แต่ก็รับไว้อีกรอบ',480,
+      ['ชอบคนที่พิมพ์มาสองครั้ง','hi',26]]);
   }
-
   if(submitted===3){
-    state.textContent='processing';
-    await say([
-      ['[relationship] คิวเต็มแล้ว','warnline'],
-      440,
-      'ระบบประมวลผลไม่ทัน',
-      480,
-      ['พิมพ์มาเยอะขนาดนี้ ระบบเริ่มไม่ไหวแล้วนะ','hi',26]
-    ]);
-    return;
+    return say([['[system] คิวเต็มแล้ว','warnline'],440,'ระบบประมวลผลไม่ทัน',480,
+      ['พิมพ์มาเยอะขนาดนี้ ระบบเริ่มไม่ไหวแล้วนะ','hi',26]]);
   }
-
-  await say([
-    ['[relationship] ยังอ่านอยู่ ไม่ต้องรีบ','sys'],
-    420,
-    ['"'+text+'" — รับไว้แล้วเหมือนกัน','hi',26]
-  ]);
+  return say([['[system] ยังอ่านอยู่ ไม่ต้องรีบ','sys'],420,
+    ['"'+text+'" — รับไว้แล้วเหมือนกัน','hi',26]]);
 }
 
-/* ── ปุ่ม ── */
-var CHIPS=[
+async function run(raw){
+  var cmd=String(raw||'').trim();
+  if(!cmd||busy)return;
+  busy=true; if(input)input.disabled=true;
+  history.push(cmd); hIdx=history.length;
+  line(cmd,'cmd');
+  await wait(190);
+  var key=cmd.toLowerCase(), fn=null;
+  if(/rm\s+-rf/.test(key)||key==='dontpress') fn=CMDS.dontpress;
+  else if(/^sudo\b/.test(key)) fn=CMDS.sudo;
+  else if(ALIAS[key]) fn=CMDS[ALIAS[key]];
+  if(fn) await fn(); else await freeInput(cmd);
+  line('','');
+  busy=false; if(input)input.disabled=false;
+}
+
+var MENU=[
   ['นี่ใครกันนะ','whoami'],
   ['รู้อะไรเกี่ยวกับฉันบ้าง','scan'],
   ['เน็ตฉันเร็วแค่ไหน','ping'],
+  ['สถิติของฉัน','score'],
   ['ห้ามกดนะ','dontpress'],
+  ['เล่นด่านอีกรอบ','replay'],
   ['มีอะไรให้เล่นอีก','help']
 ];
-CHIPS.forEach(function(c){
+MENU.forEach(function(m){
   var b=document.createElement('button');
-  b.className='chip'; b.type='button'; b.textContent=c[0];
-  b.onclick=function(){ ghostType(c[1]); };
-  $('chips').appendChild(b);
+  b.className='item'; b.type='button';
+  b.innerHTML='<span></span><span class="go">→</span>';
+  b.firstChild.textContent=m[0];
+  b.onclick=function(){
+    if(m[1]==='replay'){ CMDS.replay(); return; }
+    run(m[1]);
+    out.scrollIntoView({block:'nearest',behavior:reduced?'auto':'smooth'});
+  };
+  $('menu').appendChild(b);
 });
-/* กดปุ่มแล้วคำสั่งจริงจะค่อยๆ พิมพ์ลงในช่องให้เห็น */
-var ghosting=false;
-function ghostType(cmd){
-  if(busy||ghosting)return;
-  if(reduced){ run(cmd); return; }
-  ghosting=true; input.value='';
-  var i=0;
-  (function step(){
-    input.value=cmd.slice(0,++i);
-    if(i<cmd.length) setTimeout(step,55);
-    else setTimeout(function(){ input.value=''; ghosting=false; run(cmd); },240);
-  })();
-}
 
+$('typeToggle').onclick=function(){
+  var row=$('promptRow'), open=!row.classList.contains('hidden');
+  row.classList.toggle('hidden');
+  this.textContent=open?'หรือพิมพ์คำสั่งเอง':'ซ่อนช่องพิมพ์';
+  if(!open) input.focus();
+};
 input.addEventListener('keydown',function(e){
   if(e.key==='Enter'){ var v=input.value; input.value=''; run(v); }
   else if(e.key==='ArrowUp'){ e.preventDefault(); if(hIdx>0) input.value=history[--hIdx]; }
@@ -531,28 +862,8 @@ input.addEventListener('keydown',function(e){
   }
 });
 
-/* ── ทักทายตอนเปิด + ทักตามเวลาจริง ── */
-function greetByHour(){
-  var h=new Date().getHours();
-  if(h>=0&&h<5)   return 'ตี'+(h===0?'สิบสอง':h)+'แล้ว ยังไม่นอนอีกเหรอ';
-  if(h<7)         return 'เช้ามากเลยนะ ระบบเพิ่งตื่นเหมือนกัน';
-  if(h<11)        return 'เช้านี้ระบบตื่นก่อนคุณอีก';
-  if(h<13)        return 'เที่ยงแล้ว กินข้าวหรือยัง';
-  if(h<16)        return 'บ่ายแล้ว ระบบก็เริ่มง่วงเหมือนกัน';
-  if(h<19)        return 'เย็นแล้ว วันนี้เป็นยังไงบ้าง';
-  if(h<22)        return 'ค่ำแล้ว ว่างพอดีเลยใช่ไหม';
-  return 'ดึกแล้วนะ แต่ระบบยังไม่ปิด';
-}
-setTimeout(function(){
-  say([
-    ['ระบบพร้อมทำงาน','sys'],
-    ['[system] '+greetByHour(),'sys'],
-    ['กดปุ่มข้างล่าง หรือพิมพ์อะไรก็ได้ลงในช่อง','sys']
-  ]);
-},reduced?0:1500);
-
-/* ── สลับแท็บออกไปแล้วชื่อแท็บเปลี่ยน ── */
-var realTitle=document.title, awayTimer=null, awayCount=0;
+/* ── สลับแท็บ ── */
+var realTitle=document.title, awayTimer=null;
 var AWAY=['เอ๊ะ ไปไหนแล้ว','ยังรออยู่นะ','กลับมาก่อนสิ','ระบบเหงาแล้ว'];
 document.addEventListener('visibilitychange',function(){
   clearTimeout(awayTimer);
@@ -562,19 +873,8 @@ document.addEventListener('visibilitychange',function(){
       document.title=AWAY[Math.min(i,AWAY.length-1)];
       i++; awayTimer=setTimeout(cycle,6000);
     })();
-  }else{
-    document.title=realTitle;
-    awayCount++;
-    if(awayCount===1&&!busy) say([['[system] อ้าว กลับมาแล้ว','sys']]);
-    else if(awayCount===3&&!busy) say([['[system] หนีไปแล้วกลับมาอีก ระบบเริ่มชินแล้วนะ','sys']]);
-  }
+  }else document.title=realTitle;
 });
-
-/* ── อยู่นานแล้วระบบทักเอง ── */
-setTimeout(function(){ if(!busy) say([['[session] อยู่นานเลยนะ ระบบไม่ได้ทำอะไรผิดใช่ไหม','sys']]); },75000);
-setTimeout(function(){ if(!busy) say([['[session] ยังอยู่อีก เริ่มชอบแล้วนะเนี่ย','sys']]); },170000);
-
-setTimeout(function(){ var b=$('beam'); if(b)b.remove(); },1400);
 })();
 </script>
 </body>
